@@ -1,0 +1,64 @@
+We are having multiple tests in a class and if you execute the class file you will observe that there is no
+order in executing the @Test testcases.
+
+The way i written the @Test test cases are:
+
+public class Priority_of_Executing_Testcases {
+	
+	@Test(priority=1)
+	public void testLogin(){
+		System.out.println("Login Test");
+	}
+	
+	@Test(priority=2,dependsOnMethods={"testLogin"})
+	public void testChangePassword(){
+		System.out.println("Password Change Test");
+	}
+	
+	@Test(priority=3,dependsOnMethods={"testLogin"})
+	public void testLogout(){
+		System.out.println("Logout Test");
+	}
+}
+	
+Output:
+Password Change Test
+Login Test
+Logout Test
+
+So, to execute them in the order we want then we have prioritize the test cases.
+Syntax: @Test(priority=1,2,3,... n)
+
+And when you run the test cases again. The output will be in the order we want it to be executed.
+
+Output:
+Login Test
+Password Change Test
+Logout Test
+
+So, now the order is been followed. This way we can order our test cases based on the priority.
+
+Suppose if i write Assert.assertEquals("A", "B");
+So, obviously it will fail when comparing Actual with Expected value.
+
+So, if "Login" is failing but still it will execute the other test cases.
+If that is the case then what is point in executing "Change Password and Logout" test cases if you are not able
+to login.
+
+So, for that you have make the test cases dependent on each other. You have to group the test cases to make 
+them dependent on each other. 
+
+For that there is a command dependsOnMethods={"Test case method name which is dependent"}.
+Example: @Test(priority=2,dependsOnMethods={"testLogin"})
+
+Similarly Test3.
+Example: @Test(priority=3,dependsOnMethods={"testLogin"})
+
+Now, if the first test case fails the rest of the test cases which are dependent on the first test case will
+be skipped.
+
+**You can add methods with comma separated in dependsOnMethods.
+Example: @Test(priority=3,dependsOnMethods={"testLogin","testChangePassword"})
+
+In case, "testLogin" passes and "testChangePassword" fails then "testLogout" will not execute because it is
+dependent on testChangePassword.

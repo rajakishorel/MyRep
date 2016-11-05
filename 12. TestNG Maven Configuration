@@ -1,0 +1,253 @@
+Let's create maven testng project.
+
+There are some common commands to create a maven project.
+
+Run --> cmd --> Go to project workspace
+
+Step1: mvn archetype:generate
+Step2: Don't enter anything. Just hit Enter.
+Step3: Don't enter anything. Just hit Enter.
+Step4: Define value for property 'groupId': : com.learntestng (Note: groupId is where we give package)
+Step5: Define value for property 'artifactId': : learntestng  (Note: Your Project name)
+Step6: Define value for property 'version':  1.0-SNAPSHOT: : 1
+Step7: Define value for property 'package':  com.learntestng: : Don't enter anything. Just hit Enter.
+Step8:  Y: :y
+
+And now you will see that a folder named learntestng has been generated in our workspace which contains
+"src" folder and "pom.xml" file. Now we need to convert this project into eclipse project. 
+
+So, we need to be first inside the project folder.
+C:\workspace>cd C:\workspace\learntestng
+
+Now i will give the command
+Step9: mvn eclipse:eclipse
+C:\workspace\learntestng>mvn eclipse:eclipse
+
+Now you will see BUILD SUCCESS message.
+
+If you now see in our project learntestng folder. you will be able to see ".classpath" and ".project" files 
+have been generated which means our project has been now converted into eclipse project.
+
+Step10: Now you have to import the learntestng project into eclipse. File -> Import -> General - Existing Projects into Workspace ->
+Browse -> Choose your project folder in our case "learntestng" folder -> Finish.
+
+Now open pom.xml file and inside it i don't want dependency on junit as i want TestNG as dependency.
+So, i am removing junit dependency from pom.xml
+
+If you go to TestNG site they have given the testng dependency. copy that and paste it in our pom.xml
+inside the dependencies tag. 
+
+  <dependencies>
+	<dependency>
+  	<groupId>org.testng</groupId>
+  	<artifactId>testng</artifactId>
+  	<version>6.8</version>
+  	<scope>test</scope>
+	</dependency>
+  </dependencies>
+  
+  **Now go to command prompt and give the command "mvn compile". Example: C:\workspace\learntestng>mvn compile
+  
+  This command will compile the project and download the newly added dependencies.
+  
+  Also give the command mvn eclipse:eclipse
+  
+ Now we are going to see:
+ 
+ 1. Run java file from command prompt 
+ 2. Run testng.xml file from maven command line.
+ 3. surefire reports with maven.
+ 4. xslt reports with maven.
+ 5. mvn test site.
+
+1. Run java file from command prompt:
+-------------------------------------
+To run AppTest.java
+First let us write an sop in sendMail() method in AppTest.java file. Now if i want to run this test from 
+command prompt then i need to use maven surefire plugin dependency.
+
+Once we add this maven sure fire plugin under dependencies.
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<configuration>
+					<!-- Skip the normal tests, we'll run them in the integration-test phase -->
+					<skip>true</skip>
+				</configuration>
+
+			</plugin>
+		</plugins>
+	</build>
+	
+We have to compile it. Run
+
+Step1: mvn compile
+Step2: mvn test site - to get the results.
+
+It will automatically detects the test cases and executes them.
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running TestSuite
+Configuring TestNG with: org.apache.maven.surefire.testng.conf.TestNG652Configur
+ator@ba8a1dc
+********* App Test ***********
+********* Sample Test ***********
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.595 sec
+
+Results :
+
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+
+
+2. Run testng.xml file from maven command line.
+-----------------------------------------------
+Now let us create a new source folder. Right click on the project(learntestng) -> New -> Source Folder
+In folder name field create this folder structure. Example: src/test/resources
+
+Inside src/test/resources folder copy the testng.xml file.
+
+And in "pom.xml" file add the following lines in maven-surefire-report-plugin inside configuration tags.
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<configuration>
+					<suiteXmlFiles>
+						<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+						</suiteXmlFiles>
+					<!-- Skip the normal tests, we'll run them in the integration-test phase -->
+					<skip>true</skip>
+				</configuration>
+
+			</plugin>
+		</plugins>
+	</build>
+	
+And in "testng.xml" file add both the test cases.
+
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+  
+<suite name="learntestng" verbose="1" >
+
+  <test name="App Test">
+    <classes>
+       <class name="com.learntestng.AppTest"/>
+    </classes>
+  </test>
+  
+  <test name="Sample Test">
+    <classes>
+       <class name="com.learntestng.SampleTest"/>
+    </classes>
+  </test>
+  
+</suite>
+
+Step1:
+you have to compile the program with the command "mvn compile"
+C:\workspace\learntestng>mvn compile
+
+Step2:
+you have to run the test with the command "mvn test"
+C:\workspace\learntestng>mvn test
+
+It will automatically detects the test cases and executes them.
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running TestSuite
+Configuring TestNG with: org.apache.maven.surefire.testng.conf.TestNG652Configur
+ator@ba8a1dc
+********* App Test ***********
+********* Sample Test ***********
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.615 sec
+
+Results :
+
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+
+
+3. surefire reports with maven.
+-------------------------------
+To get the surefire reports you have execute the command called 
+
+mvn surefire-report:report
+
+surefire reports will be generated under target -> site -> surefire-report.html
+
+** "mvn clean" command will clear the reports to make you generate the fresh reports.
+
+
+4. XSLT Reports with maven. XSLT - XML Style-sheet language for Transformation
+---------------------------
+We have to include the following reporting plugins in pom.xml file.
+
+	  <reporting>
+        <plugins>
+        <!-- TestNG-xslt related configuration. -->
+            <plugin>
+                <groupId>org.reportyng</groupId>
+                <artifactId>reporty-ng</artifactId>
+                <version>1.2</version>
+            <configuration>
+                <!-- Output directory for the testng xslt report -->
+                <outputdir>/target/testng-xslt-report</outputdir> <surefireReportDirectory>/target/surefire-reports/testng-junit-results</surefireReportDirectory> <sorttestcaselinks>true</sorttestcaselinks>
+                <testdetailsfilter>FAIL,SKIP,PASS,CONF,BY_CLASS</testdetailsfilter>
+                <showruntimetotals>true</showruntimetotals>
+            </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+   
+    <pluginRepositories>
+        <pluginRepository>
+            <id>reporty-ng</id>
+            <url>https://github.com/cosminaru/reporty-ng/raw/master/dist/maven</url>
+        </pluginRepository>
+    </pluginRepositories>
+    
+ This link is not working so as the plugin won't work. Leave this topic until i get the concept of Extent Reports.
+ 
+ 
+ 5. Running TestNG programmatically without testng.xml file.
+ ----------------------------------------------------------
+ Now instead of writing testng.xml file. you can also write a java program which can execute your test cases in a 
+ serial order rather than making an xml file.
+ 
+ Let's create a project called "Module9_Testng_Prog" and inside it let's create a package called "suiteABC" and
+ inside it let's create some classes called "TestA, TestB and TestC".
+ 
+ Now if you want to execute the 3 testcases in a serial order. you can use testng.xml  or can do it programmatically
+ Let's create another package called "runner" and inside it let's create a class called Runner.java in the main 
+ method and inside it i can write code to execute A,B and C classes rather than using testng.xml file.
+ 
+ This is what running testng programmatically means how you can do that is quite easy.
+ 
+ First you have to create an object for TestNG class. Ex: TestNG myTestNG = new TestNG();
+ Second you have to create an object for XmlSuite class. Ex: XmlSuite mySuite = new XmlSuite();
+ Third you have to name the suite. Ex: mySuite.setName("suiteABC");
+ Fourth you have to create an object for XmlTest class. Ex: XmlTest testA = new XmlTest(mySuite);
+ you map this XmlTest to your TestSuite in our case it will be "mySuite".
+ 
+ Similarly i have make 3 objects here for every XmlTest class.
+ 
+ you name all the 3 test cases and associate them with the suite i.e mySuite.
+ Now you want to tell what are all the classes that are associated with these tests.
+ 
+ So far that you need to make a List 
+ 
+ ************** Last point was in complete ********************
+ 
+ 
+ 
+ 

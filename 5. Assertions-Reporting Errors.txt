@@ -1,0 +1,98 @@
+Example class: YahooNewsTest
+
+In YahooNewsTest, i want to compare and verify "Expected Value" with "Actual Value".
+
+Then i want to print the result in reports. if expected value and actual value do not match then test is a failure.
+
+For example, i want to make sure that some text is present on the page or else a link is present on the page.
+
+If it is not present then i have to throw an error. So, in this case we use assertions.
+
+We have an in-built class "Assert" in TestNG and when we write "Assert." it will give you whole lot of functions.
+and one of them is Assert.assertEquals(actual, expected). Suppose my expected value is "Good" and my actual value,
+who will get this actual value? Selenium will get this actual value. This "Actual Value" will read from the Application.
+
+Right now we will hard code the actual value as "Good". So what assertEquals means that make sure actual and 
+expected value are equal. Only then pass the test case otherwise fail the test case.
+
+Example: Assert.assertEquals("Good", "Good");
+
+Before that Please comment the skip lines in YahooNews() method.
+//  throw new SkipException("Skipping testNews");
+
+When i run this YahooNewsTest, It will pass as both actual value and expected value are equal.
+But if i change the Actual value as "GoodX" then the test is reporting a failure as in comparison it won't match.
+
+Similarly, Assert.assertTrue(condition, message) is an other one static function inside the in-built class Assert in 
+TestNG and it accepts 2 parameters condition and some message. This condition should evaluate to true then only
+the test will get pass otherwise fail.
+
+I am writing assertTrue, if this condition evaluates to true i.e suppose if i write 6>1 it is true then test will pass.
+If the condition evaluates to false that means condition is not satisfied then the error message which you throw over
+here will be displayed in the reports and the test will fail.
+
+Example: Assert.assertTrue(6>1, "Custom Error Message");
+
+So, when will assertTrue fail means it will fail when the condition evaluates to false.
+
+Similarly, you can write Assert.assertFalse(condition, message); This is opposite of true.
+This condition should evaluate to false then only the test will get pass otherwise fail.
+
+If i write the condition 1>9
+
+Example: Assert.assertFalse(1>9, "Custom Error Message");
+
+No error message will be thrown both the assertion will be passed.
+
+**Suppose if i write System.out.println("Before assertion error");
+and after lines of Assertion i will write another SOP System.out.println("After assertion error");
+
+System.out.println("Before assertion error");
+Assert.assertTrue(6>10, "Custom Error Message for assertTrue"); // if this condition fails
+Assert.assertFalse(11>9, "Custom Error Message for assertFalse");
+System.out.println("After assertion error");
+
+
+After executing the testng.xml it has executed until "Before assertion error".
+If the above assertTrue fails then it won't continue executing the rest of the lines.
+
+**Note: In a @Test if an assertion fails the lines after that assertion failure are not executed.
+
+If that @Test fails skip over to the next @Test. It happens like this
+
+
+			Test1					Test2					Test3
+		 -----------			 -----------			 -----------
+		|			|			|	|		|			|			|
+		|			|			|	|		|			|			|
+		|			|-----------|-->|		|---------->|			|
+		|			|			|	|------>|			|			|
+		 -----------			 -----------			 -----------
+
+Suppose i have 3 testcases and Test1 passes the execution control to Test2 and Test2 passes the execution 
+control to Test3.
+
+If Test2 testcase fails in between and only half of the test fails the error will be reported and execution
+controls goes to the next Test3.
+
+**But sometimes we might want to report a failure but continue forward with the next lines of code.
+
+**So if assertion is failing then we can use "try catch" block around assertion and we'll write throwable(t) beside catch.
+
+assertion is not an exception it's an error so we can write (Throwable t) Throwable can catch an error as well as 
+exceptions. so we'll write an SOP in catch block saying that "Caught the error".
+
+So what will happen is the control will come and it will check the condition is true or not.
+if the assertion is true then it will pass the control to the next line and will not go to catch block.
+but if the assertion fails then an assertion error is thrown and the control goes to the catch block and it will 
+report the error and after that the code will start running normally from there onwards.
+
+**And if you see in the reports all the testcases will be shown as passed including the test case which you caught an 
+error as passed. This is because i have caught the error and we know that when ever the control comes to the catch 
+block we caught an error but it is not reported. So we have write some code inside catch block which will report 
+the error into the reports.
+
+Suppose if there are list of links in a website and you have to click on every link to check whether it is redirecting
+to the related page or not and in the process if the next link is not redirecting to the page then you should not
+stuck there as you have continue checking the rest of the links. so in this kind of scenarios we can use this
+try catch block around assertions.  

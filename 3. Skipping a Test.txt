@@ -1,0 +1,4 @@
+-- Skipping a Test --
+
+To skip tests we need to include this line in BeforeTest
+throw new SkipException("Skipping testNews");

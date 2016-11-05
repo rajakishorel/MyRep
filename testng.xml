@@ -1,0 +1,23 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+  
+<suite name="Yahoo" verbose="1" >
+
+  <test name="Yahoo Mail Test" >
+    <classes>
+       <class name="test.YahooMailTest" />
+    </classes>
+  </test>
+ 
+  <test name="Yahoo News Test">
+    <classes>
+       <class name="test.YahooNewsTest"/>
+    </classes>
+  </test>
+  
+  <test name="Yahoo Registration Test">
+    <classes>
+       <class name="test.YahooRegistrationTest_Parameterization"/>
+    </classes>
+  </test>
+  
+</suite>

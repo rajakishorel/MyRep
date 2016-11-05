@@ -1,0 +1,210 @@
+Listeners for Logging in case of FAILED SKIPPED and PASSED test cases.
+
+If you talk about Webdriver Listener so you should make a note of some classes and interfaces that 
+we will use so will talk about it.
+
+1- WebDriverEventListener – This is an interface, which have some predefined methods so we will implement 
+all of these methods.
+
+2-EventFiringWebDriver- This is an class that actually fire Webdriver event.
+
+Why we are using Webdriver Listeners?
+
+If you talk about Webdriver we are doing some activity like type, click, navigate etc 
+this is all your events which you are performing on your script so we should have activity 
+which actually will keep track of it.
+
+Take an example if you perform click then what should happen before click and after click.
+
+To capture these events we will add listener that will perform this task for us.
+
+----------------
+
+There is a TestListenerAdaptor, this is an internal class inside TestNG.
+Inside TestNG there is a class known as TestListenerAdatpor.
+
+http://testng.org/javadocs/org/testng/TestListenerAdapter.html
+
+To understand this concept. Let's make a new package called testng_listeners and inside it let's create a 
+class called CustomListener.class which extends TestListernerAdapter class.
+
+This means that CustomListener class will inherit all the features of TestListernerAdapter class.
+
+We'll override some of the functions in TestListernerAdapter class.
+
+Override means take for example onTestFailure(ITestResult tr).
+
+Let's make a method called onTestFailure(ITestResult tr).
+
+Example: public void onTestFailure(ITestResult tr)
+
+This method is in TestListernerAdapter class but i am overriding it in child class(CustomListener)that means
+now TestNG will automatically call up the method in CustomListerner it will not call the method in 
+TestListernerAdapter class.
+
+So, i can write my own code over here which can do something when test is failed. similarly we'll write SOP's.
+
+	public void onTestFailure(ITestResult tr){
+		//own code
+		System.out.println("Fail");
+	}
+	
+	public void onTestSkipped(ITestResult tr){
+		//own code
+		System.out.println("Skipped");
+	}
+	
+	public void onTestSuccess(ITestResult tr){
+		//own code
+		System.out.println("Success");
+	}
+	
+inside the same package we'll create another class called LoginTest in which we will create a login() method
+we'll execute this method and will make it pass.
+
+After the test case pass then the TestListernerAdapter will automatically called.
+
+But before that the listener will only work if you are using "testng.xml".
+
+Let's modify testng.xml
+
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+  
+<suite name="Listener Sample Suite" verbose="1" >
+    
+  <listerners>
+      <listerner class-name="testng_listeners.CustomListener"
+  </listerners>
+
+  <test name="Login" >
+    <classes>
+       <class name="testng_listeners.LoginTest" />
+    </classes>
+  </test>
+  
+</suite>
+
+Now i have registered my listener and testcase with testng. Now, i run the testng.xml and if you look into 
+console you will see "Success" is printed. This Success is coming from the CustomListener class. 
+
+CustomListener class will automatically call onTestSuccess(ITestResult tr).
+
+Suppose if you fail this testcase in LoginTest - login()
+Example: Assert.assertEquals("A", "A+");
+
+Now run testng.xml by right clicking on it Run As -> TestNG Suite
+
+you will see "Fail" in the console.
+
+1. The catch here is the Listener will only work if you register it in testng.xml file.
+2. The Listener class(CustomListener) functions meaning these 3 functions(onTestFailure, onTestSkipped, 
+onTestSuccess) are invoked after the test case is over.
+
+Why can't we use @AfterTest ? This annotation is also called after the @Test is executed. you can use it but
+you won't get the status of the @Test. you have to write some code to the known the status of the @Test.
+
+If i have 10 or 100 Test cases, i can not keep @AfterTest in each and every class. What we need to do is
+we need to have a custom listener which will automatically be called after each and every @Test is executed.
+
+And in these methods(onTestFailure, onTestSkipped, onTestSuccess) we can do various things.
+
+Suppose if we have to report it can do reporting in excel file or else if you have generate the logs you can 
+generate the logs using log4j API.
+
+Now you have 2 methods in LoginTest and if you run it you will see the result as Fail and Success in console.
+
+public class LoginTest {
+	
+	@Test(priority=1)
+	public void login(){
+		Assert.assertEquals("A", "X");
+	}
+	
+	@Test(priority=2)
+	public void adminLogin(){
+		
+	}
+	
+Now with the fail and success i also need to print my test case.
+
+The CustomListener will be called every time a test case is passed or failed. if 100 testcases are executed
+sometimes some test cases might call onTestFailure and some test cases might call onTestSkipped and some 
+test cases might call onTestSuccess every time we need to know the name of the Test case which is getting
+passed or failed. you can get it. This @Test method is passed over ITestResult in to the (onTestFailure, 
+onTestSkipped, onTestSuccess) methods and with tr we can actually print the name of the @Test case.
+
+Example:
+import org.testng.ITestResult;
+import org.testng.TestListenerAdapter;
+
+public class CustomListener extends TestListenerAdapter{
+	
+	
+	public void onTestFailure(ITestResult tr){
+		//own code
+		System.out.println("Fail - "+ tr.getName());
+	}
+	
+	public void onTestSkipped(ITestResult tr){
+		//own code
+		System.out.println("Skipped - "+ tr.getName());
+	}
+	
+	public void onTestSuccess(ITestResult tr){
+		//own code
+		System.out.println("Success - "+ tr.getName());
+	}
+}
+
+Result:
+Fail - login
+Success - adminLogin
+
+So, you will come to know the test cases which is passing and which is failing.	
+
+Now a listener can also be used in other way. 
+Example: Let me write some SOP's before Assert statement and after Assert statement
+
+	@Test(priority=1)
+	public void login(){
+		System.out.println("Start");
+		Assert.assertEquals("A", "X");
+		System.out.println("Stop");
+	}
+
+If you execute it in standalone execution then you will see that "Start" is printed but "End" is not printed.
+The test case stops in between as the assertion failed. if you put assertion statement in comments then it
+will print the "End" in console.
+
+--------
+
+There are two scenarios:
+
+		// error occurs = stop the test case
+		// error occurs = continue the test case
+		
+I don't want my test case to be stopped on assertion error i want it to be continued. Again listener will
+help us in this case to achieve this task.
+
+If test case should not stop means you have to write the assertion in try catch block.
+
+	@Test(priority=1)
+	public void login(){
+		
+		// error = stop the test case
+		// error = continue the test case
+
+		System.out.println("Start");
+		try{
+			Assert.assertEquals("A", "X");
+		}catch(Throwable t){
+			System.out.println("Error in Assertion");
+		}
+		
+		System.out.println("End");
+	}
+	
+Now when you check the Results it shows that login() method is passed. This is the problem, we are able to 
+catch the error but it never reports the test case as failed. So what we'll have to do is we have some code 
+which will report the error. To write that code means we have to use listener.
+

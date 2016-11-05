@@ -1,0 +1,133 @@
+Example: RegTest.class, Data_Provider.class, Sample.class
+
+For this to explain, Let's create a class called RegTest and will parameterize doRegister() test case with 
+multiple sets of data.
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+public class RegTest {
+	
+	@Test(dataProvider="getData")
+	public void doRegister(String username, String password, String email){
+		
+		System.out.println(username +" -- "+password +" -- "+email);
+	}
+
+
+	@DataProvider
+	public Object[][] getData(){
+		Object[][] data = new Object[2][3];
+		
+		data[0][0]="U1";
+		data[0][1]="P1";
+		data[0][2]="xyz@gmail.com";
+		
+		data[1][0]="U2";
+		data[1][1]="P2";
+		data[1][2]="abc@gmail.com";
+		
+		return data;
+	}
+}
+
+Suppose instead of one test case if you have 50 or 100 or 1000 test cases and inside each and every test
+will you write the DataProvider. Logic say's YES we have to because we have to parameterize the tests.
+
+Instead of maintaining separate Data Providers for each class. Let's create a new class which will be common
+for all the 
+
+In this "Data_Provider" class i will keep all the data providers for all tests.
+
+In my project i will be having multiple test cases. Instead of keeping seperate data providers in each of the
+tests we'll make a simple class and make different data providers and let the test cases access these 
+data providers from "Data_Provider" class.
+
+Tomorrow if we want to do any change in data providers we can simply update that in "Data_Provider" class.
+
+Let's cut the data provider in RegTest and paste it in Data_Provider class.
+
+First,
+The only modification which you need to do is that make the @Test as static so that it can be directly called
+with the class name. Remember that static stuff can be called directly with the class name. you don't need to
+create an object of that class. Example: public static Object[][] getData(){
+
+Second,
+You need to give a name to the data provider.
+Example: @DataProvider(name="regTestDataProvider")
+
+Third,
+And in your test case you have to mention data provider class name. In this example data provider class name
+means Data_Provider.class
+Example: @Test(dataProviderClass=Data_Provider.class,dataProvider="regTestDataProvider")
+
+and in this you have to change the name of the dataProvider="regTestDataProvider". That's it.. now Run the 
+test case.
+
+
+Similarly i have created another class called Sample.class and for this sample.class i have created another
+dataProvider in Data_Provider.class with the name "loginTestDataProvider".
+Example: @DataProvider(name="loginTestDataProvider")
+
+package test;
+
+import org.testng.annotations.DataProvider;
+
+public class Data_Provider {
+
+	@DataProvider(name="regTestDataProvider")
+	public static Object[][] getData(){
+		Object[][] data = new Object[2][3];
+
+		data[0][0]="U1";
+		data[0][1]="P1";
+		data[0][2]="xyz@gmail.com";
+
+		data[1][0]="U2";
+		data[1][1]="P2";
+		data[1][2]="abc@gmail.com";
+
+		return data;
+	}
+
+	@DataProvider(name="loginTestDataProvider")
+	public static Object[][] getLoginData(){
+		Object[][] data = new Object[2][2];
+
+		data[0][0]="U3";
+		data[0][1]="P3";
+
+		data[1][0]="U4";
+		data[1][1]="P4";
+
+		return data;
+	}
+}
+
+And made changes in Sample.class like this
+
+import org.testng.annotations.Test;
+
+public class Sample {
+	
+		@Test(priority=1,dataProviderClass=Data_Provider.class,dataProvider="loginTestDataProvider")
+		public void testLogin(String username, String password){
+			//Assert.assertEquals("A", "B");
+			System.out.println("Login Test");
+		}
+		
+		@Test(priority=2,dependsOnMethods={"testLogin"})
+		public void testChangePassword(){
+			System.out.println("Password Change Test");
+		}
+		
+		@Test(priority=3,dependsOnMethods={"testLogin","testChangePassword"})
+		public void testLogout(){
+			System.out.println("Logout Test");
+		}
+}
+
+So, we can create as many Data provider's as we want and can access directly from the Data_Provider.class.
+
+So, you can have multiple data providers in Data_Provider.class you can keep all your data providers at one
+place and all your test cases can access required data providers.

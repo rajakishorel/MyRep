@@ -1,0 +1,92 @@
+Can 2 Test cases have the same data provider. Example: Testcases.class,
+
+Yes. we can have. Let's discuss an example of this. Let's create a Testcases.class
+
+Inside the Testcases i will create two test cases 
+
+ackage test;
+
+public class Testcases {
+	
+	@Test(priority=1)
+	public void testA(){
+		
+	}
+	
+	@Test(priority=2)
+	public void testB(){
+		
+	}
+}
+
+Suppose if both of these test cases want the same set of data.
+
+Let's create a data provider in Data_Provider.class.
+
+	@DataProvider(name="testDataProvider")
+	public static Object[][] getsampledata(){
+		Object[][] data = new Object[2][2];
+
+		data[0][0]="U5";
+		data[0][1]="P5";
+
+		data[1][0]="U6";
+		data[1][1]="P6";
+
+		return data;
+
+	}
+	
+I can refer this data provider name "testDataProvider" in both the test cases.
+Example: 
+
+import org.testng.annotations.Test;
+
+public class Testcases {
+	
+	@Test(priority=1,dataProviderClass=Data_Provider.class,dataProvider="testDataProvider")
+	public void testA(){
+		
+	}
+	
+	@Test(priority=2,dataProviderClass=Data_Provider.class,dataProvider="testDataProvider")
+	public void testB(){
+		
+	}
+}
+
+For both these tests, data will be sent 2 times. Below data
+
+		data[0][0]="U5";
+		data[0][1]="P5";
+
+		data[1][0]="U6";
+		data[1][1]="P6";
+		
+Multiple tests can have the same data provider. We are assuming a scenario that there are multiple tests 
+which wants the same data and they have the same data provider.
+
+After execution you will see testA and testB will execute 2 times with the same set of data.
+
+** There is another scenario were multiple tests but with different data and same data provider.
+Can this possible?
+
+For example, let's take our RegTest.class which is having "regTestDataProvider" data provider and take 
+Sample.class in which we are having "loginTestDataProvider" data provider but can these both tests have same
+data provider.
+
+Yes, they can have.
+
+Go to your data provider and there You will have to pass over a parameter with overloaded version of it. 
+	
+	@DataProvider(name="testDataProvider")
+	public static Object[][] getsampledata(Method m){
+	
+With the Method m when this data provider "testDataProvider" is called automatically TestNG passes the 
+name of the method to Method m and if the name of the method testA match with the if condition 
+then it will execute with it's test data else if the name of the test case is testB then it will execute 
+with it's test data.
+
+So multiple test cases can have same data provider whether they want with the same set of data whether 
+they want with different set of data.
+

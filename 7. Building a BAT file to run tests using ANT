@@ -1,0 +1,18 @@
+Open command prompt and get to your project location.
+Example: cd C:\workspace\Module9>
+
+ant clean 
+ant compile 
+ant run
+ant makexsltreports
+
+Now open a notepad copy the commands that you usually use to run the program through ANT.
+
+1. cd C:\workspace\Module9>
+2. ant clean compile run makexsltreports
+
+Now save the above notepad file in double quotes like "MY_TEST_SUITE.bat" and save it on the desktop.
+
+Now close the command prompt and just double click on the MY_TEST_SUITE.bat file.
+
+It will start executing your programs through bat file irrespective of the bat file location.

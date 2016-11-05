@@ -1,0 +1,710 @@
+How to generate Custom Reports with TestNG ? Sample Project: Module9_TestNg_Customizing_Reports
+
+So, first question arises What do you mean by custom reports ? 
+Reports which are primarily for your project only. you probably might be wanted to have your project name on it.
+Which is exclusively for your project only. you don't need to depend on the XSLT Reports or something.
+
+Developing custom reports can be divided into 2 parts:
+
+1st phase, is to find out the status of each and every test case. How many are passed, failed and skipped.
+2nd phase, is to put that status in some format probably into excel or probably into html this process is known as
+customization.
+
+First you need to get know what all test cases are passed and failed.
+Second phase will be discussed when we talk about frameworks.
+
+Now, lets create a project called "Module9_TestNg_Customizing_Reports" and inside i have created 2 "testSuiteA" and 
+testSuiteB packages.
+
+Inside the packages i have created 2 test cases "TestA1" and "TestA2" in testSuiteA and inside each of these 
+test cases i have written 3 test methods in TestA1(testA1_1, testA1_2, testA1_3) and in 
+TestA2(testA2_1, testA2_2, testA2_3).
+
+In each test case i put failed, passed and skipped test methods.
+
+Similarly, i have create 2 test cases "TestB1" and "TestB2" in testSuiteB and inside each of these 
+test cases i have written 3 test methods in TestB1(testB1_1, testB1_2, testB1_3) and in 
+TestB2(testB2_1, testB2_2, testB2_3).
+
+So, to run everything in batch we have create xml files.
+
+Suite-A.xml represents testSuiteA
+-----------
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Suite A">
+
+<test name="Test A1">
+    <classes>
+        <class name="testSuiteA.TestA1" ></class>  
+    </classes>
+</test>
+
+<test name="Test A2">
+    <classes>
+        <class name="testSuiteA.TestA2" ></class>  
+    </classes>
+</test>
+</suite>
+
+Suite-B.xml represents testSuiteB
+-----------
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Suite B">
+
+<test name="Test B1">
+    <classes>
+        <class name="testSuiteB.TestB1" ></class>  
+    </classes>
+</test>
+
+<test name="Test B2">
+    <classes>
+        <class name="testSuiteB.TestB2" ></class>  
+    </classes>
+</test>
+</suite>
+
+We will create "testng.xml" file to execute the test cases in a batch.
+
+testng.xml
+----------
+<suite name="My suite">
+  <suite-files>
+    <suite-file path="./Suite_A.xml" />
+    <suite-file path="./Suite_B.xml" />
+  </suite-files>
+</suite>
+
+Now that i have got the results after executing testng.xml file.
+
+Now i have to write for the custom reports.
+
+Lets create a "customreports" package and inside the package i will write a new class called "CustomReporter".
+
+CustomReporter must implement IReporter which is pre-defined interface in TestNG.
+Example: public class CustomReporter implements IReporter{}
+
+When you hover your mouse pointer over CustomReporter you will get an option to "Add unimplemented methods" from
+IReporter. select that option to add unimplemented methods to our CustomReporter class.
+
+Then you will give us a method which is unimplemented method in IReporter called "generateReport" with few 
+parameters inside the parenthesis like shown below.
+
+Example:
+@Override
+	public void generateReport(List<XmlSuite> xmlSuites, 
+							   List<ISuite> suites,
+							   String outputDirectory) {
+
+Now, you need to register your "CustomReporter" as a listener in "testng.xml" file like below code.
+
+<suite name="My suite">
+  <listeners>
+    <listener class-name="customreports.CustomReporter" />
+  </listeners>
+
+  <suite-files>
+    <suite-file path="./Suite_A.xml" />
+    <suite-file path="./Suite_B.xml" />
+  </suite-files>
+</suite>
+
+Now after this, if you run the "testng.xml" after executing the test cases the control goes inside "CustomReporter".
+
+This happens because i have listed this class as a listener. The TestNG framework automatically calls it. It's an 
+internal call in TestNG.
+
+So we will write a "for" loop in generateReport
+for(int suiteNum=0;suiteNum<suites.size();suiteNum++){
+
+	@Override
+	public void generateReport(List<XmlSuite> xmlSuites, 
+							   List<ISuite> suites,
+							   String outputDirectory) {
+		
+		System.out.println("***********INSIDE CUSTOM REPORTER**************");
+		for(int suiteNum=0;suiteNum<suites.size();suiteNum++){
+			ISuite currentTestSuite = suites.get(suiteNum);
+			System.out.println("Test Suite Name -> "+ currentTestSuite.getName());
+			System.out.println(currentTestSuite.getResults());}
+			
+When Isuite=0, you will get the first suite name.
+
+if you run testng.xml file it will print all the suite names from our Suite_A.xml, Suite_B.xml and testng.xml.
+***********INSIDE CUSTOM REPORTER**************
+Test Suite Name -> Suite B
+Test Suite Name -> Suite A
+Test Suite Name -> My suite
+
+Now if you want to get the results from the test suites like printing them with sop.
+System.out.println(currentTestSuite.getResults());}
+
+Result in console:
+------------------
+***********INSIDE CUSTOM REPORTER**************
+Test Suite Name -> Suite B
+{Test B1=[SuiteResult context=Test B1], Test B2=[SuiteResult context=Test B2]}
+Test Suite Name -> Suite A
+{Test A1=[SuiteResult context=Test A1], Test A2=[SuiteResult context=Test A2]}
+Test Suite Name -> My suite
+{}
+
+It is actually printing the map. which you will not be able to understand right now.
+Instead of printing the map we'll write over here currentTestSuite.getResults(); and
+take the results into a "Map" object "suiteResults"
+
+Example: Map suiteResults = CurrentTestSuite.getResults();
+
+And this Map will have "key, value" pair of the type. The key would of type "String" 
+and value would be of "ISuiteResult"
+
+Example: Map<String, ISuiteResult>  suiteResults = currentTestSuite.getResults();
+
+**When Isuite=0, you will get the first test suite and from the first test suite you 
+will get the results of all the test cases in the first test suite.
+
+For example you have testSuiteA and class TestA1 which have got 3 test cases and TestA2
+ we have 3 test cases.
+ 
+How do you getting the results of 6 test cases?
+So from the Map<String, ISuiteResult> i have to extract all the keys. I even don't know
+what the keys are. If you know the keys then you are going to extract the keys. right!
+
+So if you want to know the keys. we write over here from the Map object(suiteResults).
+there is function known as keySet();
+
+suiteResults.keySet(); will return you the keys in the form of set of strings.
+which will be stored in to the object "suiteResultKeys"
+
+Example: Set<String> suiteResultKeys = suiteResults.keySet();
+
+In a set we need to iterate over the keys. We need an Iterator.
+So you get the iterator of the set suiteResultKeys.Iterator();
+Iterator of the type String and suiteResultKeysIter. 
+
+Example: Iterator<String> suiteResultKeysIter = suiteResultKeys.iterator();
+
+you got the iterator of particular set because you want to iterate over the elements.
+and we use a "while" loop. while(suiteResultKeysIter) iterator has the next object 
+then print the next object.
+
+What will be the next object ? Lets see...
+
+Example: while(suiteResultKeysIter.hasNext()){
+			System.out.println(suiteResultKeysIter.next());
+				
+In the output you will get it like this:
+
+***********INSIDE CUSTOM REPORTER**************
+Test Suite Name -> Suite B
+Test B1
+Test B2
+Test Suite Name -> Suite A
+Test A1
+Test A2
+Test Suite Name -> My suite
+
+This is the Test Suite B we have got Test cases B1 & B2
+In Test Suite A we have got Test cases A1 & A2
+
+This 
+Test B1
+Test B2
+Test A1
+Test A2 
+The names of the test cases are being printed by this "suiteResultKeysIter.next()"
+
+So that means in xml file what ever test case names that i have given over here you
+can write any test case name.
+
+So these are the keys which are getting printed over here
+Test B1
+Test B2
+Test A1
+Test A2
+So these are the names of our test cases.
+
+In our CustomReporter this would the name of the test case.
+This would be the test case name. suiteResultKeysIter.next();
+
+If i take a String testName = suiteResultKeysIter.next();
+Inside the each test you can have one or more test classes in Suite xml.
+Example: 
+
+<test name="Test A1">
+    <classes>
+        <class name="testSuiteA.TestA1" ></class>  
+    </classes>
+</test>
+
+<test name="Test A2">
+    <classes>
+        <class name="testSuiteA.TestA2" ></class>  
+    </classes>
+</test>
+
+I get this test class into testName object and it prints the name of the test.
+
+Example:
+String testName = suiteResultKeysIter.next();
+System.out.println("Test Name -> "+testName);
+
+so we use this set to extract all the keys. The key is the name of the test from xml file.
+
+Corresponding to the key we have a result "ISuiteResult". It's an other interface inside
+TestNG.
+
+Corresponding to the name of test you have the reference of ISuiteResult which will give 
+you the result of test case.
+
+So if i write over here ISuiteResult testResult = Now from the Map, "suiteResults" this was
+the Map right. So from the Map get the value corresponding to the "testName". 
+
+Example: ISuiteResult testResult = suiteResults.get(testName);
+
+So this will give you the result of that particular test. 
+When it is TestA1 it will give you the result of TestA1 in "testResult". 
+When it is TestB1 it will give you the result of TestB1 in "testResult".
+
+So that's what i told you in the beginning. There are 2 phases, This is the 1st phase.
+In which i am just going to print the result of each and every test case under the suite
+
+
+1st Phase code:
+--------------
+	@Override
+	public void generateReport(List<XmlSuite> xmlSuites, 
+							   List<ISuite> suites,
+							   String outputDirectory) {
+		
+		System.out.println("***********INSIDE CUSTOM REPORTER**************");
+		for(int suiteNum=0;suiteNum<suites.size();suiteNum++){
+			ISuite currentTestSuite = suites.get(suiteNum);
+			System.out.println("Test Suite Name -> "+ currentTestSuite.getName());
+			//System.out.println(currentTestSuite.getResults());
+			Map<String, ISuiteResult> suiteResults = currentTestSuite.getResults();
+			
+			Set<String> suiteResultKeys = suiteResults.keySet();
+			Iterator<String> suiteResultKeysIter = suiteResultKeys.iterator();
+			
+			while(suiteResultKeysIter.hasNext()){
+				System.out.println(suiteResultKeysIter.next());
+				String testName = suiteResultKeysIter.next();
+				System.out.println("Test Name -> "+testName);}}}}
+				ISuiteResult testResult = suiteResults.get(testName);
+
+
+In the second phase, we can produce the results in a fancy way in any type of report.
+which ever report you want. So "testResult" is the result of each and every test.
+
+Now this testResult what will it hold ? When it prints the results it prints "Test A1"
+from xml file.
+
+This line System.out.println("Test Name -> "+testName); when it prints Test A1 it will
+hold the results of all the 3 test methods(testA1_1, testA2_2, testA3_3) in TestA1.
+
+Similarly Test A2 will hold the results of all the 3 test methods(testA2_1,testA2_2,testA2_3)
+in TestA2. 
+
+**So "testResult" got results of multiple tests. The results are inside "testResult"
+reference. So we write over here "testResult.getTestContext().getFailedTests();"
+this will give you all the fail tests. similarly same with pass tests.
+testResults.getTestContext().getPassedTests();
+testResults.getTestContext().getSkippedTests();
+
+So these functions will give you the total no. of passed, failed and skipped tests.
+And now what does the functions return ? it will return you the Map containing everything.
+IResultMap this will contain each and every fail test and passed test and skipped test.
+
+Example: 
+-------
+IResultMap failedTests = testResult.getTestContext().getFailedTests();
+IResultMap passedTests = testResult.getTestContext().getPassedTests();
+IResultMap skippedTests= testResult.getTestContext().getSkippedTests();
+
+And along with that if i use this function "testResult.getTestContext().getAllTestMethods();"
+What this function does is that Suppose Test A1 from xml is executing in which i got 3 methods
+(testA1_1, testA2_2, testA3_3). So, it will give all the Test methods in TestA1 and it 
+returns you an array of class known as "ITestNGMethod[]" so we are going to create a reference
+to it "allTests" which will hold all the test methods.
+
+Example:
+ITestNGMethod[]  allTests = testResult.getTestContext().getAllTestMethods();
+System.out.println("Test Method Names ->");
+
+So there are six methods and i will have all the methods in ITestNGMethod[] allTests reference.
+And in this i have failed methods, passed methods and skipped methods. 1 method is 1 test right
+
+Now i will iterate over this array ITestNGMethod[]  allTests.
+
+I will write a while loop. So there is a lot of loops inside loops. There are outer "for" loop
+which is iterating and there inner "while" loop which is iterating over the keys.
+
+**And now this loop will iterate each and every method in the test. 
+I will just print all the tests. So this will print the name of the method.
+System.out.println(allTests[testNum].getMethodName());
+
+Example:
+-------
+for(int testNum=0;testNum<allTests.length;testNum++){
+ System.out.println(allTests[testNum].getMethodName());
+ 
+Results in console:
+------------------
+***********INSIDE CUSTOM REPORTER**************
+Test Suite Name -> Suite B
+Test Name -> Test B1
+Test Method Names ->
+testB1_1
+testB1_2
+testB1_3
+Test Name -> Test B2
+Test Method Names ->
+testB2_1
+testB2_2
+testB2_3
+Test Suite Name -> Suite A
+Test Name -> Test A1
+Test Method Names ->
+testA1_1
+testA1_2
+testA1_3
+Test Name -> Test A2
+Test Method Names ->
+testA2_1
+testA2_2
+testA2_3
+Test Suite Name -> My suite
+
+Now i need to find out the result of each and every method. So, i will write
+"If" in case from "failedTests". getAllMethods() will return you Collection of the type ITestNGMethod
+
+getAllMethods():Collection<ITestNGMethod> 
+
+Example:
+--------
+if(failedTests.getAllMethods().contains(allTests[testNum])){
+	System.out.println(allTests[testNum].getMethodName() +" -- FAILED");
+
+So basically it will give you ITestNGMethod[] reference and inside it if you have current tests
+which is current method allTests[testNum] if it is there then the test is failed. you need to print
+this line System.out.println(allTests[testNum].getMethodName() +" -- FAILED"); followed by Failed.
+
+In "failedTests" if this method is present "allTests[testNum]" corresponding to the "testNum"
+then it is failing. In order words, This for loop what is it doing ? it is iterating each and every 
+number of this ITestNGMethod[] array. This array is of type TestNGMethod[] this will contain each 
+and every Test method. 
+
+In "failedTests" i got limited methods which are failed. So i check whether in failedTests the current
+test which is there "testNum" is present or not. if it is present then it is failing then you print that 
+it is failing. Ex: System.out.println(allTests[testNum].getMethodName() +" -- FAILED");
+
+"else if" Similarly among the "passedTests" and getAllMethods in the passedTests then you need to write
+System.out.println(allTests[testNum].getMethodName() +" -- PASSED");
+
+Example:
+------- 
+if(failedTests.getAllMethods().contains(allTests[testNum])){
+	System.out.println(allTests[testNum].getMethodName() +" -- FAILED");
+}else if(passedTests.getAllMethods().contains(allTests[testNum])){
+	System.out.println(allTests[testNum].getMethodName() +" -- PASSED");
+}else if(skippedTests.getAllMethods().contains(allTests[testNum])){
+	System.out.println(allTests[testNum].getMethodName() +" -- SKIPPED");
+}
+
+"else if" Similarly among the "skippedTests" and getAllMethods in the skippedTests then you need to write	
+System.out.println(allTests[testNum].getMethodName() +" -- SKIPPED");
+
+If you run the testng.xml file you will the below results.
+
+Results in console:
+------------------
+***********INSIDE CUSTOM REPORTER**************
+Test Suite Name -> Suite B
+Test Name -> Test B1
+--Test Method Names--
+testB1_1 -- PASSED
+testB1_2 -- PASSED
+testB1_3 -- FAILED
+Test Name -> Test B2
+--Test Method Names--
+testB2_1 -- PASSED
+testB2_2 -- FAILED
+testB2_3 -- PASSED
+Test Suite Name -> Suite A
+Test Name -> Test A1
+--Test Method Names--
+testA1_1 -- SKIPPED
+testA1_2 -- PASSED
+testA1_3 -- FAILED
+Test Name -> Test A2
+--Test Method Names--
+testA2_1 -- PASSED
+testA2_2 -- FAILED
+testA2_3 -- PASSED
+Test Suite Name -> My suite
+
+We will get the complete result over here which test method has passed and 
+which test method has failed or skipped. If it is failing or skipping if i am
+mentioning any reason over in test method.
+
+2nd Phase code:
+--------------
+Now we are going to print actual reason why it failed. Upto now we are able to
+print detailed description of each and every test meaning what happened with it.
+whether it is failed or passed or skipped.
+
+Now the next phase is to print what happened actually why it is failing ?
+why it is skipping ? i need to get the reason out. Now we need to write a code
+to get the reason.
+
+If it is failing then there might be multiple reason why it is failing. so we
+need to get all these things.
+
+Collection<ITestNGMethod> this will return you a "allFailedMethods" a reference 
+to our collection and you need to iterate over each and every method. you have
+to use iterator. you have to write Iterator<ITestNGMethod> collection and to 
+our collection we create a reference known as "allFailedMethodIter" and you will
+write a while loop which will iterate over each and every method i.e hasNext.
+This is iterating over each and every failed method. 
+
+Example:
+--------
+
+Collection<ITestNGMethod> allFailedMethods= failedTests.getAllMethods();
+Iterator<ITestNGMethod> allFailedMethodsIter = allFailedMethods.iterator();
+
+while(allFailedMethodsIter.hasNext()){
+	ITestNGMethod meth = allFailedMethodsIter.next();
+
+While iterating i will check if the name of the current method(allFailedMethod) 
+is equal to the name of the method System.out.println(allTests[testNum].getMethodName() +" -- FAILED"); 
+which is failing if that name "allTests[testNum].getMethodName().equals" is 
+matching with the current name over here(allFailedMethodsIter.hasNext())
+
+That means ITestNGMethod meth = allFailedMethodsIter.next(); that equals to
+the name of the method (meth.getMethodName())
+
+This "allFailedMethodsIter.hasNext()" iterating over each and every method
+
+Example:
+--------
+while(allFailedMethodsIter.hasNext()){
+	ITestNGMethod meth = allFailedMethodsIter.next();
+	if(allTests[testNum].getMethodName().equals(meth.getMethodName())){
+		Set<ITestResult> failures = failedTests.getResults(meth);}}
+
+
+if current test method(allTests[testNum]) is equal to failed method then you have found the failed 
+test method. Now you need to get the status of that test. So to get the 
+status you write over here i.e from allFailedMethod get me the result
+corresponding to the method. So, this will again actually gives you a set.
+
+I found the test case i have iterated each and every test with "allFailedMethodIter"
+I will check whether the name of the failed test is equal to the name of the current method
+"allTests[testNum].getMethodName()". So as i said one test can have multiple failures.
+So that's why it returns you the set having all the failures.
+
+Example: 
+Set<ITestResult> failures = failedTests.getResults(meth);
+
+And again you have use an Iterator of the type <ITestResult> which will iterate over
+each and every failure and we call it "failuresIter" 
+
+Example:
+-------
+Iterator<ITestResult> failuresIter= failures.iterator();
+
+And again you have to write a while loop and i directly print over here the reason for failure
+in sop.
+
+Example:
+-------
+while(failuresIter.hasNext()){
+System.out.println("Reason = "+failuresIter.next().getThrowable().getMessage());
+
+which will get you the actual reason why it is failing. if you run testng.xml
+
+Results in console:
+------------------
+***********INSIDE CUSTOM REPORTER**************
+Test Suite Name -> Suite B
+Test Name -> Test B1
+--Test Method Names--
+testB1_3 -- FAILED
+Reason = failed test case 
+Test Name -> Test B2
+--Test Method Names--
+testB2_2 -- FAILED
+Reason = failed test case 
+Test Suite Name -> Suite A
+Test Name -> Test A1
+--Test Method Names--
+testA1_3 -- FAILED
+Reason = failed test case 
+Test Name -> Test A2
+--Test Method Names--
+testA2_2 -- FAILED
+Reason = failed test case 
+Test Suite Name -> My suite
+
+This is the reason which i am actually giving inside the test case when failing.
+
+Similar kind of while you can also place in case the case has Skipped.
+
+Only thing you will have to draw a different collection over here.
+The collection instead of "allFailedMethods" you will have to write "allSkippedMethods"
+and "allSkippedMethodsIter"
+
+Example:
+--------
+else if(skippedTests.getAllMethods().contains(allTests[testNum])){
+			System.out.println(allTests[testNum].getMethodName() +" -- SKIPPED");
+			// reason
+			Collection<ITestNGMethod> allSkippedMethods= skippedTests.getAllMethods();
+			Iterator<ITestNGMethod> allSkippedMethodsIter = allSkippedMethods.iterator();
+						
+			while(allSkippedMethodsIter.hasNext()){
+				ITestNGMethod meth = allSkippedMethodsIter.next();
+				if(allTests[testNum].getMethodName().equals(meth.getMethodName())){
+					Set<ITestResult> skips = skippedTests.getResults(meth);
+					Iterator<ITestResult> skipIter= skips.iterator();
+					while(skipIter.hasNext()){
+						System.out.println("Reason = "+skipIter.next().getThrowable().getMessage());
+					}
+
+We customize it more when we do frameworks.
+
+Below is the complete code for CustomReporter class:
+---------------------------------------------------
+
+package customreports;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.testng.IReporter;
+import org.testng.IResultMap;
+import org.testng.ISuite;
+import org.testng.ISuiteResult;
+import org.testng.ITestNGMethod;
+import org.testng.ITestResult;
+import org.testng.xml.XmlSuite;
+
+public class CustomReporter implements IReporter{
+
+	@Override
+	public void generateReport(List<XmlSuite> xmlSuites, 
+							   List<ISuite> suites,
+							   String outputDirectory) {
+		
+		System.out.println("***********INSIDE CUSTOM REPORTER**************");
+		for(int suiteNum=0;suiteNum<suites.size();suiteNum++){
+			ISuite currentTestSuite = suites.get(suiteNum);
+			System.out.println("Test Suite Name -> "+ currentTestSuite.getName());
+			//System.out.println(currentTestSuite.getResults());
+			Map<String, ISuiteResult> suiteResults = currentTestSuite.getResults();
+			
+			Set<String> suiteResultKeys = suiteResults.keySet();
+			Iterator<String> suiteResultKeysIter = suiteResultKeys.iterator();
+			
+			while(suiteResultKeysIter.hasNext()){
+				//System.out.println(suiteResultKeysIter.next());
+				String testName = suiteResultKeysIter.next();
+				System.out.println("Test Name -> "+testName);
+				ISuiteResult testResult = suiteResults.get(testName);
+				
+				IResultMap failedTests = testResult.getTestContext().getFailedTests();
+				IResultMap passedTests = testResult.getTestContext().getPassedTests();
+				IResultMap skippedTests= testResult.getTestContext().getSkippedTests();
+				ITestNGMethod[]  allTests = testResult.getTestContext().getAllTestMethods();
+				System.out.println("--Test Method Names--");
+
+				for(int testNum=0;testNum<allTests.length;testNum++){
+					
+					//System.out.println(allTests[testNum].getMethodName());
+					
+					if(failedTests.getAllMethods().contains(allTests[testNum])){
+						System.out.println(allTests[testNum].getMethodName() +" -- FAILED");
+
+						Collection<ITestNGMethod> allFailedMethods= failedTests.getAllMethods();
+						Iterator<ITestNGMethod> allFailedMethodsIter = allFailedMethods.iterator();
+						
+						while(allFailedMethodsIter.hasNext()){
+							ITestNGMethod meth = allFailedMethodsIter.next();
+							if(allTests[testNum].getMethodName().equals(meth.getMethodName())){
+								Set<ITestResult> failures = failedTests.getResults(meth);
+								Iterator<ITestResult> failuresIter= failures.iterator();
+								while(failuresIter.hasNext()){
+									System.out.println("Reason = "+failuresIter.next().getThrowable().getMessage());
+								}
+							}
+							
+						}
+						
+						// reason
+					}else if(passedTests.getAllMethods().contains(allTests[testNum])){
+						System.out.println(allTests[testNum].getMethodName() +" -- PASS");
+					}else if(skippedTests.getAllMethods().contains(allTests[testNum])){
+						System.out.println(allTests[testNum].getMethodName() +" -- SKIPPED");
+						// reason
+						Collection<ITestNGMethod> allSkippedMethods= skippedTests.getAllMethods();
+						Iterator<ITestNGMethod> allSkippedMethodsIter = allSkippedMethods.iterator();
+						
+						while(allSkippedMethodsIter.hasNext()){
+							ITestNGMethod meth = allSkippedMethodsIter.next();
+							if(allTests[testNum].getMethodName().equals(meth.getMethodName())){
+								Set<ITestResult> skips = skippedTests.getResults(meth);
+								Iterator<ITestResult> skipIter= skips.iterator();
+								while(skipIter.hasNext()){
+									System.out.println("Reason = "+skipIter.next().getThrowable().getMessage());
+								}
+							}
+							
+						}
+					}
+
+				}
+
+			}
+
+		}
+	}
+
+}
+
+Final Output will look like this:
+--------------------------------
+
+***********INSIDE CUSTOM REPORTER**************
+Test Suite Name -> Suite B
+Test Name -> Test B1
+--Test Method Names--
+testB1_1 -- PASS
+testB1_2 -- PASS
+testB1_3 -- FAILED
+Reason = failed test case 
+Test Name -> Test B2
+--Test Method Names--
+testB2_1 -- PASS
+testB2_2 -- FAILED
+Reason = failed test case 
+testB2_3 -- PASS
+Test Suite Name -> Suite A
+Test Name -> Test A1
+--Test Method Names--
+testA1_1 -- SKIPPED
+Reason = Skipping the test
+testA1_2 -- PASS
+testA1_3 -- FAILED
+Reason = failed test case 
+Test Name -> Test A2
+--Test Method Names--
+testA2_1 -- PASS
+testA2_2 -- FAILED
+Reason = failed test case 
+testA2_3 -- PASS
+Test Suite Name -> My suite

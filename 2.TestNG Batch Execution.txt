@@ -1,0 +1,44 @@
+Up to now we have executed each of the class individually. Ex: YahooMailTest.java
+
+Now, we'll execute both the tests in a batch. Ex: YahooMailTest.java + YahooNewsTest.java
+
+This can be done using a file known as "testng.xml". This file has some configuration which will tell testng
+and eclipse that these are the following testcases which have to be run together.
+
+To manually create testng.xml file:
+
+1. Go to http://testng.org/doc/documentation-main.html
+2. Copy the xml content from example testng.xml file
+3. Create a new file in source and name it as testng.xml
+4. Paste the copied xml content inside the newly created testng.xml file.
+5. Now modify as per your test classes.
+
+Example:
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+  
+<suite name="Yahoo" verbose="1" >
+
+  <test name="Yahoo Mail Test" >
+    <classes>
+       <class name="test.YahooMailTest" />
+    </classes>
+  </test>
+ 
+  <test name="Yahoo News Test">
+    <classes>
+       <class name="test.YahooNewsTest"/>
+    </classes>
+  </test>
+  
+</suite>
+
+*test name="" can be anything that's not a problem but in <class name=""/> the package and class name 
+must be same that are inside the project.
+
+* The execution order in testng.xml will start from top to bottom.
+
+* To execute:
+1. Right click on testng.xml file
+2. Select the option "Run As" -> TestNG Suite.
+
+It will be executed in a batch with execution order from top to bottom.

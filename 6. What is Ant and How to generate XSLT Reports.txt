@@ -1,0 +1,61 @@
+Ant is something which can help you to run your programs on linux based servers and systems or it can also help 
+you to run your program on command prompt.
+
+Suppose i want run whole suite through command prompt. Till now we have ran our programs through eclipse.
+
+Using ant we can run our programs through command prompt. ANT is a build and compile tool.
+
+Download the zip file from http://ant.apache.org/bindownload.cgi
+
+Extract it and point the folder by creating a environment variable called ANT_HOME = "Folder path".
+Now point the bin path inside ANT Folder in path variable.
+
+Run the command ant in command prompt. It will give you an error message
+copy tools.jar file from jdk\lib folder and paste it in to jre\lib folder.
+
+Now still you will get the following error messages.
+Buildfile: build.xml does not exist!
+Build failed
+
+ANT always looks for a file called Build.xml when it is running the program. If you want to run your project through
+ANT or through command prompt then you need to use Build.xml file.
+
+If we want to generate a detailed TestNG report then we have to run through the ANT. These kind of reports can be 
+generated through eclipse.
+
+**Build.xml file is like a heart of ANT. Make sure your Build.xml should be under the project only.
+
+Change the following places in Build.xml file.
+
+1st place:
+<!-- ========== Initialize Properties =================================== -->
+    <property environment="env"/>
+    
+    <property name="ws.home" value="${basedir}"/>
+	<property name="ws.jars" value="D:\Selenium Jars"/> // value should be the location of your jar files.
+	
+2nd place:
+<!-- compile -->
+<javac 
+            debug="true" 
+            destdir="${test.dest}" 
+            srcdir="${test.src}" 
+            target="1.8" // you have to modified the target to your jdk version.
+            
+3rd place:
+you have to provide the xsl sheet in to the follow location.
+"src/xslt/testng-results.xsl"
+
+Once the above configurations are done then we are good to go.
+
+Now in command prompt run
+1. ant compile 			// which compiles your project
+2. ant run 				// which runs your project
+3. ant makexsltreports	// which generates xslt reports in "XSLT_Reports" folder inside your project.
+4. ant clean			// you can clean your build folder in your project which gets created when you compile your project.
+
+Now open index.html file inside XSLT_Reports -> output folder.
+
+If you open the file index.hmtl file you will now get to see the detailed XSLT Report.
+
+XSLT - XML Style-sheet language for Transformation
